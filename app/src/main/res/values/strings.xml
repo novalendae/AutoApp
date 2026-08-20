@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">KaizenAuto</string>
+    <string name="accessibility_label">KaizenAuto — Motor de Gestos</string>
+    <string name="accessibility_summary">Executa toques e gestos definidos pelos seus scripts.</string>
+    <string name="accessibility_description">Permite que o KaizenAuto execute toques, deslizes e ações do sistema em nome dos seus scripts de automação. Nenhum dado é enviado para fora do aparelho.</string>
+    <string name="channel_runtime">Execução de Scripts</string>
+</resources>
