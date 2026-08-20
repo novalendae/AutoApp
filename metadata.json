@@ -1,0 +1,6 @@
+{
+  "name": "KaizenAuto",
+  "description": "Automação Android por visão computacional e scripts Lua com self-healing e aprendizado adaptativo",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
