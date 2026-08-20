@@ -32,11 +32,27 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
-
-      - name: Build Debug & Release APKs
+      - name: Locate Android Project & Build APKs
         run: |
+          # 1. Localiza onde está o build.gradle(.kts)
+          BUILD_FILE=$(find . -maxdepth 3 -name "build.gradle*" | head -n 1)
+          if [ -z "$BUILD_FILE" ]; then
+            echo "❌ Erro: Nenhum arquivo build.gradle encontrado no repositório!"
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$BUILD_FILE")
+          echo "📁 Diretório do projeto Android encontrado: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
+
+          # 2. Verifica se o gradlew existe; se não existir, gera usando o gradle global
+          if [ ! -f "./gradlew" ]; then
+            echo "⚠️ gradlew não encontrado. Gerando o wrapper do Gradle..."
+            gradle wrapper || gradle wrapper --gradle-version 8.7
+          fi
+
+          chmod +x ./gradlew
+
+          # 3. Compila os APKs
           ./gradlew assembleDebug --no-daemon --stacktrace
           ./gradlew assembleRelease --no-daemon --stacktrace || true
 
@@ -45,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kaizen-auto-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: '**/build/outputs/apk/debug/*.apk'
           retention-days: 14
           if-no-files-found: warn
 
@@ -54,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kaizen-auto-release-apk
-          path: app/build/outputs/apk/release/*.apk
+          path: '**/build/outputs/apk/release/*.apk'
           retention-days: 14
           if-no-files-found: warn
 
@@ -62,9 +78,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/release/*.apk
+          files: '**/build/outputs/apk/**/*.apk'
           draft: false
           prerelease: false
           generate_release_notes: true
