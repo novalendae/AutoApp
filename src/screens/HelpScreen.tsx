@@ -146,6 +146,10 @@ const HELP_SECTIONS: HelpSection[] = [
         code: 'back()   home()   recents()',
         explanation: 'Dispara os botões de navegação Voltar, Início ou Recentes do Android.',
       },
+      {
+        code: 'openApp("com.supercell.clashofclans")',
+        explanation: 'Abre o aplicativo ou jogo informado pelo nome do pacote Android.',
+      },
     ],
   },
   {

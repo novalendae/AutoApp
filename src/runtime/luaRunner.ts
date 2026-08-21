@@ -271,7 +271,7 @@ export class ScriptRunner {
         continue;
       }
 
-      // back / home / recents
+      // back / home / recents / openApp
       if (rawLine.startsWith('back()')) {
         this.callbacks.onLog('INFO', 'Botão Voltar acionado.');
         await this.sleep(0.3);
@@ -280,6 +280,17 @@ export class ScriptRunner {
       if (rawLine.startsWith('home()')) {
         this.callbacks.onLog('INFO', 'Botão Início acionado.');
         await this.sleep(0.3);
+        continue;
+      }
+      if (rawLine.startsWith('openApp(') || rawLine.startsWith('launchApp(')) {
+        const match = rawLine.match(/(?:openApp|launchApp)\s*\(\s*["']([^"']+)["']\s*\)/);
+        if (match) {
+          const pkg = match[1];
+          this.callbacks.onLog('INFO', `🚀 Abrindo app: ${pkg}`);
+          this.callbacks.onToast(`Abrindo: ${pkg}`);
+          this.launchAndroidPackage(pkg);
+          await this.sleep(1.5);
+        }
         continue;
       }
 
@@ -372,6 +383,27 @@ export class ScriptRunner {
     } else {
       this.healing.recordFailure(text);
       return false;
+    }
+  }
+
+  private launchAndroidPackage(packageName: string) {
+    try {
+      // Se estiver em ambiente nativo Android WebView (Capacitor / Intent Scheme)
+      if (typeof window !== 'undefined') {
+        const intentUrl = `android-app://${packageName}`;
+        const fallbackUrl = `https://play.google.com/store/apps/details?id=${packageName}`;
+        
+        // Tenta abrir via scheme Android Intent se for Android nativo
+        const isAndroidDevice = /android/i.test(navigator.userAgent || '');
+        if (isAndroidDevice) {
+          window.location.href = `intent:#Intent;package=${packageName};end`;
+        } else {
+          // Em simulador/web preview, loga a intenção de execução
+          console.log(`[KaizenAuto] Disparado Intent para pacote: ${packageName}`);
+        }
+      }
+    } catch (err) {
+      console.warn(`[KaizenAuto] Não foi possível iniciar o pacote ${packageName}:`, err);
     }
   }
 }
